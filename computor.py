@@ -40,12 +40,16 @@ class X:
 		else:
 			return None
 
+regex = ''
+
 def parse(input):
-	input = input.replace(' ', '')
+	input = input.replace(' ', '').replace('+-', '-').replace('-+', '-').replace('--', '+').replace('++', '+')
 	print(input)
 
 if __name__ == '__main__':
 	if len(sys.argv) == 2:
+		input = sys.argv[1]
+		input = "5 + 4 * X + X^2= X^2"
 		x1 = X(3, 2)
 		x2 = X(5, 2)
 		x3 = X(2, 3)
@@ -55,6 +59,6 @@ if __name__ == '__main__':
 		print(x1 - x2)
 		print(x1 * x2)
 		print(x1 / x2)
-		parse(sys.argv[1])
+		parse(input)
 	else:
 		print('not valid input')
