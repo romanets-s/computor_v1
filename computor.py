@@ -3,6 +3,17 @@ import argparse
 import re
 
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
 class X:
 	def __init__(self, digit, degree):
 		self.degree = degree
@@ -21,7 +32,7 @@ class X:
 
 	def __str__(self):
 		if self.digit:
-			return '{:+.10g} * X^'.format(self.digit) + str(self.degree)
+			return '{:+g} * X^'.format(self.digit) + str(self.degree)
 		return ''
 
 
@@ -40,36 +51,33 @@ class Solver:
 		self.__change_abc(parsed_left, False)
 		self.__change_abc(parsed_right, True)
 		if self.a.digit:
-			self.max_degree = self.c.degree
+			self.max_degree = self.a.degree
 		elif self.b.digit:
 			self.max_degree = self.b.degree
 
 	def resolve(self):
 		if self.max_degree == 2:
 			disc = self.b.digit ** 2 - (4 * self.a.digit * self.c.digit)
-			print('dis is ' + str(disc))
 			if disc == 0:
-				print("Discriminant is 0, the solution is:")
-				print("-b / (2 * a) = " + str(-self.b.digit / (2 * self.a.digit)))
+				print(bcolors.OKBLUE + "Discriminant is 0, the solution is:" + bcolors.ENDC + '\n {: .6}'.format((-self.b.digit / (2 * self.a.digit))))
 			elif disc > 0:
-				print("Discriminant is strictly positive, the two solutions are:")
-				print("(-b - (d ** 0.5)) / (2 * a) = " + str((-self.b.digit - (disc ** 0.5)) / (2 * self.a.digit)))
-				print("(-b + (d ** 0.5)) / (2 * a) = " + str((-self.b.digit + (disc ** 0.5)) / (2 * self.a.digit)))
+				print(bcolors.OKBLUE + "Discriminant is strictly positive, the two solutions are:" + bcolors.ENDC + '\n{0: .6}\n{1: .6}'.format(((-self.b.digit - (disc ** 0.5)) / (2 * self.a.digit)), ((-self.b.digit + (disc ** 0.5)) / (2 * self.a.digit))))
 			else:
-				print("Discriminant is strictly negative, the two solutions are:")
-				print("(-b - (d ** 0.5)) / (2 * a) = " + str((-self.b.digit - (abs(disc) ** 0.5)) / (2 * self.a.digit)))
-				print("(-b + (d ** 0.5)) / (2 * a) = " + str((-self.b.digit + (abs(disc) ** 0.5)) / (2 * self.a.digit)))
+				print(bcolors.OKBLUE + "Discriminant is strictly negative, the two solutions are:" + bcolors.ENDC + '\n{0: .6}\n{1: .6}'.format(((-self.b.digit - (abs(disc) ** 0.5)) / (2 * self.a.digit)), ((-self.b.digit + (abs(disc) ** 0.5)) / (2 * self.a.digit))))
 		elif self.max_degree == 1:
-			print("The solution is:")
-			print("-c / b = " + str(-self.c.digit / self.b.digit))
+			print(bcolors.OKBLUE + "The solution is:" + bcolors.ENDC + '\n{0: .6}'.format((-self.c.digit / self.b.digit)))
 		else:
 			if self.c.digit == 0:
-				print("Every real are solution")
+				print(bcolors.OKBLUE + "Every real number are solution" + bcolors.ENDC)
 			else:
-				print("No solution")
+				print(bcolors.OKBLUE + "No solution" + bcolors.ENDC)
 
 	def get_reduced_form(self):
 		reduced = str(self.c) + ' ' + str(self.b) + ' ' + str(self.a) + ' = 0'
+		reduced = reduced.replace('+', '+ ')
+		reduced = reduced.replace('-', '- ')
+		if reduced.startswith('-') or reduced.startswith('+'):
+			reduced = reduced[2:]
 		return reduced
 
 	def __change_abc(self, parsed, is_revert):
@@ -109,7 +117,7 @@ def regex_type_validation(raw_input):
 	max_degree = get_max_degree(raw_input)
 	if max_degree > 2 or n != len(raw_input) or raw_input.count('=') != 1:
 		if max_degree > 2:
-			raise argparse.ArgumentTypeError('Polynomial degree: ' + str(max_degree) + '\nThe polynomial degree is stricly greater than 2, I can`t solve.')
+			raise argparse.ArgumentTypeError(bcolors.FAIL + 'Polynomial degree: ' + str(max_degree) + '\nThe polynomial degree is stricly greater than 2, I can`t solve.' + bcolors.ENDC)
 		raise argparse.ArgumentTypeError('Polinomial equation not valid')
 	return raw_input
 
@@ -120,7 +128,6 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 	solve = Solver(args.polynomial_equation)
 	solve.parse()
-	print('Reduced form: ' + solve.get_reduced_form())
-	print('Polynomial degree: ' + str(solve.max_degree))
-	print(solve.a, solve.b, solve.c)
+	print(bcolors.OKGREEN + 'Reduced form: ' + bcolors.ENDC + solve.get_reduced_form())
+	print(bcolors.OKGREEN + 'Polynomial degree: ' + bcolors.ENDC + str(solve.max_degree))
 	solve.resolve()
